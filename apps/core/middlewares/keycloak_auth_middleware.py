@@ -23,8 +23,14 @@ class KeyCloakAuthMiddleware(MiddlewareMixin):
         token = token.split("Bearer ")[-1]
         session_key = request.session.session_key
         if session_key:
-            cache_token = cache.get(session_key)
+            cache_data = cache.get(session_key)
+            if cache_data:
+                cache_token = cache_data["token"]
+            else:
+                cache_token = ""
             if cache_token == token:
+                request.user.roles = cache_data["roles"]
+                request.user.group_list = cache_data["group_list"]
                 return None
         user = auth.authenticate(request=request, token=token)
         if user is not None:
@@ -33,7 +39,8 @@ class KeyCloakAuthMiddleware(MiddlewareMixin):
             if not session_key:
                 request.session.cycle_key()
             session_key = request.session.session_key
-            cache.set(session_key, token, settings.LOGIN_CACHE_EXPIRED)
+            data = {"token": token, "roles": user.roles, "group_list": user.group_list}
+            cache.set(session_key, data, settings.LOGIN_CACHE_EXPIRED)
             # 登录成功，重新调用自身函数，即可退出
             return self.process_view(request, view, args, kwargs)
         return WebUtils.response_401(_("please provide Token"))

@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ),
-    "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S",
+    "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%S%z",
     "NON_FIELD_ERRORS_KEY": "params_error",
     "DEFAULT_RENDERER_CLASSES": ("config.drf.renderers.CustomRenderer",),
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",

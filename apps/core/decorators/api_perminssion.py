@@ -27,10 +27,10 @@ class HasRole(object):
             request = args[0]
             if isinstance(request, View):
                 request = args[1]
-            user_info = request.userinfo
+            user_info = request.user
             if not self.roles:
                 return task_definition(*args, **kwargs)
-            roles = user_info["roles"]
+            roles = user_info.roles
             for i in roles:
                 if i in self.roles:
                     return task_definition(*args, **kwargs)

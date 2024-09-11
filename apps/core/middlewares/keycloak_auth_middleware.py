@@ -25,5 +25,5 @@ class KeyCloakAuthMiddleware(MiddlewareMixin):
             if not session_key:
                 request.session.cycle_key()
             # 登录成功，重新调用自身函数，即可退出
-            return self.process_view(request, view, args, kwargs)
+            return None
         return WebUtils.response_401(_("please provide Token"))

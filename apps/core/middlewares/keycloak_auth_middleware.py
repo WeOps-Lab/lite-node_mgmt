@@ -2,13 +2,10 @@ import logging
 
 from django.conf import settings
 from django.contrib import auth
-from django.core.cache import caches
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import gettext as _
 
 from apps.core.utils.web_utils import WebUtils
-
-cache = caches["db"]
 
 
 class KeyCloakAuthMiddleware(MiddlewareMixin):

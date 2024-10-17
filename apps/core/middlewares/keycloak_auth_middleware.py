@@ -20,8 +20,8 @@ class KeyCloakAuthMiddleware(MiddlewareMixin):
             if request.path.startswith("/swagger"):
                 return None
 
-        # 开放接口，不需要认证
-        if request.path.startswith('/open_api/'):
+        # 开放接口，不需要认证，djnago admin管理页面不需要认证
+        if request.path.startswith('/open_api/') or request.path.startswith('/admin/'):
             return None
 
         token = request.META.get(settings.AUTH_TOKEN_HEADER_NAME)

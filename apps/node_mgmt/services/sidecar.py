@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.utils.http import quote_etag
 
 from apps.node_mgmt.constants import L_INSTALL_DOWNLOAD_URL, L_SIDECAR_DOWNLOAD_URL, W_SIDECAR_DOWNLOAD_URL
-from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, Action, NodeCollectorConfiguration
+from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration
 
 
 class Sidecar:
@@ -35,14 +35,6 @@ class Sidecar:
 
         # 从数据库获取采集器列表
         collectors = list(Collector.objects.values())
-
-        for collector in collectors:
-            collector.update(
-                id=collector.pop('collector_id'),
-                name=collector.pop('collector_name'),
-                node_operating_system=collector.pop('operating_system'),
-            )
-
         # 生成新的 ETag
         _collectors = JsonResponse(collectors, safe=False).content
         new_etag = Sidecar.generate_etag(_collectors.decode('utf-8'))
@@ -57,16 +49,6 @@ class Sidecar:
     def update_node_client(request, node_id):
         """更新sidecar客户端信息"""
 
-        # 从请求体中获取数据
-        request_data = dict(
-            node_id=node_id,
-            node_name=request.data.get("node_name", ""),
-            **request.data.get("node_details", {}),
-        )
-
-        # 更新或创建Sidecar信息
-        new_obj, _ = Node.objects.update_or_create(node_id=node_id, defaults=request_data)
-
         # 获取客户端发送的ETag
         if_none_match = request.headers.get('If-None-Match')
 
@@ -77,21 +59,35 @@ class Sidecar:
         if cached_etag and cached_etag == if_none_match:
             return JsonResponse(status=304, data={}, headers={'ETag': cached_etag})
 
+        # 从请求体中获取数据
+        request_data = dict(
+            id=node_id,
+            name=request.data.get("node_name", ""),
+            **request.data.get("node_details", {}),
+        )
+
+        # 更新或创建Sidecar信息
+        new_obj, _ = Node.objects.update_or_create(id=node_id, defaults=request_data)
+
         # 构造响应数据
         response_data = dict(
-                configuration={"update_interval": 5, "send_status": True},    # 配置信息, 60s更新一次
+                configuration={"update_interval": 5, "send_status": True},    # 配置信息, 5s更新一次
                 configuration_override=True,    # 是否覆盖配置
                 actions=[],   # 采集器状态
                 assignments=[],   # 采集器配置
             )
-        action_obj = Action.objects.filter(node_id=node_id).first()
+
+        # 节点操作信息
+        action_obj = new_obj.action_set.first()
         if action_obj:
             response_data.update(actions=action_obj.action)
             action_obj.delete()
-        assignments = NodeCollectorConfiguration.objects.filter(node_id=node_id)
+
+        # 节点配置信息
+        assignments = new_obj.collectorconfiguration_set.all()
         if assignments:
             response_data.update(
-                assignments=[{"collector_id": i.collector_id, "configuration_id": i.config_id} for i in assignments])
+                assignments=[{"collector_id": i.collector_id, "configuration_id": i.id} for i in assignments])
 
         # 生成新的ETag
         _response_data = JsonResponse(response_data).content
@@ -117,7 +113,7 @@ class Sidecar:
             return JsonResponse(status=304, data={}, headers={'ETag': cached_etag})
 
         # 从数据库获取节点信息
-        node = NodeCollectorConfiguration.objects.filter(node_id=node_id, config_id=configuration_id).first()
+        node = Node.objects.filter(id=node_id).first()
         if not node:
             return JsonResponse(status=404, data={}, manage="Node collector Configuration not found")
 
@@ -127,7 +123,7 @@ class Sidecar:
             return JsonResponse(status=404, data={}, manage="Configuration not found")
         configuration = dict(
             id=configuration.config_id,
-            collector_id=configuration.collector.collector_id,
+            collector_id=configuration.collector_id,
             name=configuration.config_name,
             template=configuration.config_template,
         )

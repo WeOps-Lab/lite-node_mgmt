@@ -1,6 +1,15 @@
 from django.db import models
-from django.db.models import JSONField, CharField, IntegerField, FloatField, DateTimeField, DateField, TimeField, Field, \
-    BooleanField
+from django.db.models import (
+    BooleanField,
+    CharField,
+    DateField,
+    DateTimeField,
+    Field,
+    FloatField,
+    IntegerField,
+    JSONField,
+    TimeField,
+)
 
 
 class VtypeMixin(models.Model):

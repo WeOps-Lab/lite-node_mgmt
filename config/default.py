@@ -91,6 +91,18 @@ if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
     CORS_ALLOW_CREDENTIALS = True
 
+    SWAGGER_SETTINGS = {
+        "SECURITY_DEFINITIONS": {
+            "basic": {"type": "basic"},
+            "bearer": {"type": "apiKey", "name": "Authorization", "in": "header"},
+        },
+        "APIS_SORTER": "alpha",
+        "JSON_EDITOR": True,
+        "OPERATIONS_SORTER": "alpha",
+        "VALIDATOR_URL": None,
+        "AUTO_SCHEMA_TYPE": 2,  # 分组根据url层级分，0、1 或 2 层
+    }
+
 # 缓存配置
 REDIS_CACHE_URL = os.environ.get("REDIS_CACHE_URL", "")
 

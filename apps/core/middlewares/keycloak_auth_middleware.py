@@ -6,6 +6,7 @@ from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import gettext as _
 
 from apps.core.utils.web_utils import WebUtils
+from config.default import DEBUG
 
 
 class KeyCloakAuthMiddleware(MiddlewareMixin):
@@ -14,6 +15,15 @@ class KeyCloakAuthMiddleware(MiddlewareMixin):
         self.logger = logging.getLogger(__name__)
 
     def process_view(self, request, view, args, kwargs):
+        # 开发模式，放行swagger
+        if DEBUG is True:
+            if request.path.startswith("/swagger"):
+                return None
+
+        # 开放接口，不需要认证
+        if request.path.startswith('/open_api/'):
+            return None
+
         token = request.META.get(settings.AUTH_TOKEN_HEADER_NAME)
         if token is None:
             return WebUtils.response_401(_("please provide Token"))

@@ -44,6 +44,7 @@ class KeycloakAuthBackend(ModelBackend):
             user.save()
             user.group_list = groups
             user.roles = roles
+            user.locale = user_info.get("locale", "zh-Hans")
             return user
         except IntegrityError:
             logger.exception(traceback.format_exc())

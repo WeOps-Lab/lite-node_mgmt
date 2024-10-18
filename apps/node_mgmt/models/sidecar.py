@@ -4,13 +4,18 @@ from django.db.models import JSONField
 from apps.core.models.maintainer_info import MaintainerInfo
 from apps.core.models.time_info import TimeInfo
 
+OS_TYPE = (
+    ("linux", "Linux"),
+    ("windows", "Windows"),
+)
+
 
 class Node(TimeInfo, MaintainerInfo):
 
     id = models.CharField(primary_key=True, max_length=100, verbose_name="节点ID")
     name = models.CharField(max_length=100, verbose_name="节点名称")
     ip = models.CharField(max_length=30, verbose_name="IP地址")
-    operating_system = models.CharField(max_length=50, default="", verbose_name="操作系统类型")
+    operating_system = models.CharField(max_length=50, choices=OS_TYPE, verbose_name="操作系统类型")
     collector_configuration_directory = models.CharField(max_length=200, verbose_name="采集器配置目录")
     metrics = JSONField(default=dict, verbose_name="指标")
     status = JSONField(default=dict, verbose_name="状态")
@@ -24,13 +29,19 @@ class Node(TimeInfo, MaintainerInfo):
 
 class Collector(TimeInfo, MaintainerInfo):
 
+    ServiceType = (
+        ("exec", "执行任务"),
+        ("svc", "服务"),
+    )
+
     id = models.CharField(primary_key=True, max_length=100, verbose_name="采集器ID")
     name = models.CharField(max_length=100, verbose_name="采集器名称")
-    service_type = models.CharField(max_length=100, verbose_name="服务类型")
-    node_operating_system = models.CharField(max_length=50, default="", verbose_name="节点操作系统类型")
+    service_type = models.CharField(max_length=100, choices=ServiceType, verbose_name="服务类型")
+    node_operating_system = models.CharField(max_length=50, choices=OS_TYPE, verbose_name="节点操作系统类型")
     executable_path = models.CharField(max_length=200, verbose_name="可执行文件路径")
     execute_parameters = models.CharField(max_length=200, verbose_name="执行参数")
     validation_parameters = models.CharField(max_length=200, verbose_name="验证参数")
+    default_template = models.TextField(verbose_name="默认模板")
 
     class Meta:
         verbose_name = "采集器信息"
@@ -58,3 +69,20 @@ class Action(TimeInfo, MaintainerInfo):
     class Meta:
         verbose_name = "操作信息"
         db_table = "action"
+
+
+class SidecarApiToken(TimeInfo, MaintainerInfo):
+    token = models.CharField(max_length=100, verbose_name="Token")
+
+    class Meta:
+        verbose_name = "Sidecar API Token"
+        db_table = "sidecar_api_token"
+
+
+class SidecarEnv(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    value = models.CharField(max_length=200)
+
+    class Meta:
+        verbose_name = "Sidecar环境变量"
+        db_table = "sidecar_env"

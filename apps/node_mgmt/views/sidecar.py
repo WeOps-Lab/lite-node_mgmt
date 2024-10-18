@@ -6,6 +6,7 @@ from rest_framework.viewsets import ViewSet
 from apps.core.utils.web_utils import WebUtils
 from apps.node_mgmt.services.sidecar import Sidecar
 from common.open_base import OpenAPIViewSet
+from apps.node_mgmt.utils.token_auth import token_auth
 
 
 class SidecarViewSet(ViewSet):
@@ -81,6 +82,7 @@ class OpenSidecarViewSet(OpenAPIViewSet):
         operation_description="获取服务器信息",
     )
     @action(detail=False, methods=["get"], url_path="node")
+    @token_auth
     def server_info(self, request):
         return Sidecar.get_version()
 
@@ -89,6 +91,7 @@ class OpenSidecarViewSet(OpenAPIViewSet):
         operation_description="获取采集器列表",
     )
     @action(detail=False, methods=["get"], url_path="node/sidecar/collectors")
+    @token_auth
     def collectors(self, request):
         return Sidecar.get_collectors(request)
 
@@ -101,6 +104,7 @@ class OpenSidecarViewSet(OpenAPIViewSet):
         ],
     )
     @action(detail=False, methods=["get"], url_path="node/sidecar/configurations/render/(?P<node_id>.+?)/(?P<configuration_id>.+?)")
+    @token_auth
     def configuration(self, request, node_id, configuration_id):
         return Sidecar.get_node_config(request, node_id, configuration_id)
 
@@ -119,5 +123,6 @@ class OpenSidecarViewSet(OpenAPIViewSet):
         ),
     )
     @action(detail=False, methods=["PUT"], url_path="node/sidecars/(?P<node_id>.+?)")
+    @token_auth
     def update_sidecar_client(self, request, node_id):
         return Sidecar.update_node_client(request, node_id)

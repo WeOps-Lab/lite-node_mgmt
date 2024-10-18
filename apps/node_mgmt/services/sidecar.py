@@ -35,6 +35,9 @@ class Sidecar:
 
         # 从数据库获取采集器列表
         collectors = list(Collector.objects.values())
+        for collector in collectors:
+            collector.pop("default_template")
+
         # 生成新的 ETag
         _collectors = JsonResponse(collectors, safe=False).content
         new_etag = Sidecar.generate_etag(_collectors.decode('utf-8'))

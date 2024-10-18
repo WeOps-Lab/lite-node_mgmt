@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, Action
+from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, Action, SidecarApiToken, SidecarEnv
 
 
 @admin.register(Node)
@@ -25,3 +25,15 @@ class CollectorConfigurationAdmin(admin.ModelAdmin):
 class ActionAdmin(admin.ModelAdmin):
     list_display = ('node', 'action')
     search_fields = ('node__name',)
+
+
+@admin.register(SidecarApiToken)
+class SidecarApiTokenAdmin(admin.ModelAdmin):
+    list_display = ('token',)
+    search_fields = ('token',)
+
+
+@admin.register(SidecarEnv)
+class SidecarEnvAdmin(admin.ModelAdmin):
+    list_display = ('key', 'value')
+    search_fields = ('key', 'value')

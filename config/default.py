@@ -14,6 +14,8 @@ USE_I18N = True
 # 本地化设置
 USE_L10N = True
 
+SITE_ID = 1
+
 # 定义支持的语言
 LANGUAGES = (
     ("en", "English"),

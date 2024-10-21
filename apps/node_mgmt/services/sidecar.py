@@ -1,4 +1,5 @@
 import hashlib
+import logging
 from string import Template
 
 from django.core.cache import cache
@@ -7,6 +8,8 @@ from django.utils.http import quote_etag
 
 from apps.node_mgmt.constants import L_INSTALL_DOWNLOAD_URL, L_SIDECAR_DOWNLOAD_URL, W_SIDECAR_DOWNLOAD_URL
 from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, SidecarEnv
+
+logger = logging.getLogger("app")
 
 
 class Sidecar:
@@ -71,6 +74,8 @@ class Sidecar:
             **request.data.get("node_details", {}),
         )
 
+        logger.debug(f"node data: {request_data}")
+
         # 更新或创建Sidecar信息
         new_obj, _ = Node.objects.update_or_create(id=node_id, defaults=request_data)
 
@@ -123,11 +128,11 @@ class Sidecar:
             return JsonResponse(status=404, data={}, manage="Node collector Configuration not found")
 
         # 从数据库获取配置信息
-        configuration = CollectorConfiguration.objects.filter(config_id=configuration_id).first()
+        configuration = CollectorConfiguration.objects.filter(id=configuration_id).first()
         if not configuration:
             return JsonResponse(status=404, data={}, manage="Configuration not found")
         configuration = dict(
-            id=configuration.config_id,
+            id=configuration.id,
             collector_id=configuration.collector_id,
             name=configuration.config_name,
             template=configuration.config_template,

@@ -25,6 +25,7 @@ class Node(TimeInfo, MaintainerInfo):
     class Meta:
         verbose_name = "节点信息"
         db_table = "node"
+        verbose_name_plural = "节点信息"
 
 
 class Collector(TimeInfo, MaintainerInfo):
@@ -40,12 +41,13 @@ class Collector(TimeInfo, MaintainerInfo):
     node_operating_system = models.CharField(max_length=50, choices=OS_TYPE, verbose_name="节点操作系统类型")
     executable_path = models.CharField(max_length=200, verbose_name="可执行文件路径")
     execute_parameters = models.CharField(max_length=200, verbose_name="执行参数")
-    validation_parameters = models.CharField(max_length=200, verbose_name="验证参数")
-    default_template = models.TextField(verbose_name="默认模板")
+    validation_parameters = models.CharField(blank=True, null=True, max_length=200, verbose_name="验证参数")
+    default_template = models.TextField(blank=True, null=True, verbose_name="默认模板")
 
     class Meta:
         verbose_name = "采集器信息"
         db_table = "collector"
+        verbose_name_plural = "采集器信息"
 
 
 class CollectorConfiguration(TimeInfo, MaintainerInfo):
@@ -54,11 +56,12 @@ class CollectorConfiguration(TimeInfo, MaintainerInfo):
     name = models.CharField(max_length=100, verbose_name="配置名称")
     config_template = models.TextField(verbose_name="配置模板")
     collector = models.ForeignKey(Collector, on_delete=models.CASCADE, verbose_name="采集器")
-    nodes = models.ManyToManyField(Node, verbose_name="节点")
+    nodes = models.ManyToManyField(Node, blank=True, verbose_name="节点")
 
     class Meta:
         verbose_name = "采集器配信息"
         db_table = "collector_configuration"
+        verbose_name_plural = "采集器配信息"
 
 
 class Action(TimeInfo, MaintainerInfo):
@@ -69,6 +72,7 @@ class Action(TimeInfo, MaintainerInfo):
     class Meta:
         verbose_name = "操作信息"
         db_table = "action"
+        verbose_name_plural = "操作信息"
 
 
 class SidecarApiToken(TimeInfo, MaintainerInfo):
@@ -77,6 +81,7 @@ class SidecarApiToken(TimeInfo, MaintainerInfo):
     class Meta:
         verbose_name = "Sidecar API Token"
         db_table = "sidecar_api_token"
+        verbose_name_plural = "Sidecar API Token"
 
 
 class SidecarEnv(models.Model):
@@ -86,3 +91,4 @@ class SidecarEnv(models.Model):
     class Meta:
         verbose_name = "Sidecar环境变量"
         db_table = "sidecar_env"
+        verbose_name_plural = "Sidecar环境变量"

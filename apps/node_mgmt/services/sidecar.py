@@ -1,10 +1,12 @@
 import hashlib
+from string import Template
+
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.utils.http import quote_etag
 
 from apps.node_mgmt.constants import L_INSTALL_DOWNLOAD_URL, L_SIDECAR_DOWNLOAD_URL, W_SIDECAR_DOWNLOAD_URL
-from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration
+from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, SidecarEnv
 
 
 class Sidecar:
@@ -137,8 +139,39 @@ class Sidecar:
         # 更新缓存中的 ETag
         cache.set(f"configuration_etag_{configuration_id}", new_etag)
 
+        # 渲染配置模板
+        configuration['template'] = Sidecar.render_template(configuration['template'], Sidecar.get_variables(node))
+
         # 返回配置信息和新的 ETag
         return JsonResponse(configuration, headers={'ETag': new_etag})
+
+    @staticmethod
+    def get_variables(node_obj):
+        """获取变量"""
+        objs = SidecarEnv.objects.all()
+        variables = {obj.key: obj.value for obj in objs}
+        node_dict = {
+            "node__id": node_obj.id,
+            "node__name": node_obj.name,
+            "node__ip": node_obj.ip,
+            "node__operating_system": node_obj.operating_system,
+            "node__collector_configuration_directory": node_obj.collector_configuration_directory,
+        }
+        variables.update(node_dict)
+        return variables
+
+    @staticmethod
+    def render_template(template_str, variables):
+        """
+        渲染字符串模板，将 ${变量} 替换为给定的值。
+
+        :param template_str: 包含模板变量的字符串
+        :param variables: 字典，包含变量名和对应值
+        :return: 渲染后的字符串
+        """
+        template_str = template_str.replace('node.', 'node__')
+        template = Template(template_str)
+        return template.safe_substitute(variables)
 
     # def get_installation_steps(self):
     #     """获取安装步骤"""

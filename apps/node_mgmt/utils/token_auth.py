@@ -2,6 +2,7 @@ import base64
 import hashlib
 import hmac
 import json
+import logging
 
 from django.core.cache import cache
 from django.http import JsonResponse
@@ -9,13 +10,19 @@ from functools import wraps
 from config.default import AUTH_TOKEN_HEADER_NAME, SECRET_KEY
 from apps.node_mgmt.models.sidecar import SidecarApiToken
 
+logger = logging.getLogger("app")
+
 
 def token_auth(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        token = request.META.get(AUTH_TOKEN_HEADER_NAME).split("Bearer ")[-1],
-        # 检查 token 是否存在和有效
-        if not token or not is_valid_token(token):
+        try:
+            token = request.request.META.get(AUTH_TOKEN_HEADER_NAME).split("Bearer ")[-1]
+            # 检查 token 是否存在和有效
+            if not token or not is_valid_token(token):
+                return JsonResponse({'error': 'Unauthorized'}, status=401)
+        except Exception as e:
+            logger.error(f"token_auth error: {e}")
             return JsonResponse({'error': 'Unauthorized'}, status=401)
 
         return view_func(request, *args, **kwargs)

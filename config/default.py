@@ -79,7 +79,7 @@ ROOT_URLCONF = "urls"
 
 DEBUG = os.getenv("DEBUG", "0") == "1"
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles/")
 

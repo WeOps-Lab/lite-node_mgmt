@@ -137,7 +137,7 @@ class Sidecar:
         configuration = dict(
             id=configuration.id,
             collector_id=configuration.collector_id,
-            name=configuration.config_name,
+            name=configuration.name,
             template=configuration.config_template,
         )
         # 生成新的 ETag

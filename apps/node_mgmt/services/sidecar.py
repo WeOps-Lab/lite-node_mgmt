@@ -74,6 +74,9 @@ class Sidecar:
             **request.data.get("node_details", {}),
         )
 
+        # 操作系统转小写
+        request_data.update(operating_system=request_data['operating_system'].lower())
+
         logger.debug(f"node data: {request_data}")
 
         # 更新或创建Sidecar信息

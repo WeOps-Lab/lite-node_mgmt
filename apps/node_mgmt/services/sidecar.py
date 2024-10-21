@@ -22,7 +22,7 @@ class Sidecar:
     @staticmethod
     def get_version():
         """获取版本信息"""
-        return JsonResponse({"version": "4.0.0"})
+        return JsonResponse({"version": "5.0.0"})
 
     @staticmethod
     def get_collectors(request):

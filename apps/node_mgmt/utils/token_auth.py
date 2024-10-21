@@ -17,8 +17,9 @@ def token_auth(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         try:
-            # token格式"Basic YWRtaW46YWR:token"
-            token = request.request.META.get(AUTH_TOKEN_HEADER_NAME).split("Basic ")[-1]
+            # token格式"Basic BASE64(YWRtaW46YWR:token)"
+            base64_token = request.request.META.get(AUTH_TOKEN_HEADER_NAME).split("Basic ")[-1]
+            token = base64.b64decode(base64_token).decode('utf-8')
             token = token.split(':', 1)[0]
             # 检查 token 是否存在和有效
             if not token or not is_valid_token(token):

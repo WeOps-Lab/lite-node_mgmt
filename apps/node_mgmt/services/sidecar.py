@@ -63,7 +63,7 @@ class Sidecar:
         # 从缓存中获取node的ETag
         cached_etag = cache.get(f"node_etag_{node_id}")
 
-        # 如果缓存的ETag存在且与客户端的相同，则返回304 Not Modified
+        # 如果缓存的ETag存��且与客户端的相同，则返回304 Not Modified
         if cached_etag and cached_etag == if_none_match:
             return JsonResponse(status=304, data={}, headers={'ETag': cached_etag})
 
@@ -80,15 +80,18 @@ class Sidecar:
         logger.debug(f"node data: {request_data}")
 
         # 更新或创建Sidecar信息
-        new_obj, _ = Node.objects.update_or_create(id=node_id, defaults=request_data)
+        Node.objects.update_or_create(id=node_id, defaults=request_data)
+
+        # 预取相关数据，减少查询次数
+        new_obj = Node.objects.prefetch_related('action_set', 'collectorconfiguration_set').get(id=node_id)
 
         # 构造响应数据
         response_data = dict(
-                configuration={"update_interval": 5, "send_status": True},    # 配置信息, 5s更新一次
-                configuration_override=True,    # 是否覆盖配置
-                actions=[],   # 采集器状态
-                assignments=[],   # 采集器配置
-            )
+            configuration={"update_interval": 5, "send_status": True},  # 配置信息, 5s更新一次
+            configuration_override=True,  # 是否覆盖配置
+            actions=[],  # 采集器状态
+            assignments=[],  # 采集器配置
+        )
 
         # 节点操作信息
         action_obj = new_obj.action_set.first()

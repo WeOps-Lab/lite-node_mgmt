@@ -42,7 +42,7 @@ class Collector(TimeInfo, MaintainerInfo):
     executable_path = models.CharField(max_length=200, verbose_name="可执行文件路径")
     execute_parameters = models.CharField(max_length=200, verbose_name="执行参数")
     validation_parameters = models.CharField(blank=True, null=True, max_length=200, verbose_name="验证参数")
-    default_template = models.TextField(blank=True, null=True, verbose_name="默认模板")
+    default_template = models.TextField(blank=True, verbose_name="默认模板")
 
     class Meta:
         verbose_name = "采集器信息"
@@ -54,7 +54,7 @@ class CollectorConfiguration(TimeInfo, MaintainerInfo):
 
     id = models.CharField(primary_key=True, max_length=100, verbose_name="配置ID")
     name = models.CharField(max_length=100, verbose_name="配置名称")
-    config_template = models.TextField(verbose_name="配置模板")
+    config_template = models.TextField(blank=True, verbose_name="配置模板")
     collector = models.ForeignKey(Collector, on_delete=models.CASCADE, verbose_name="采集器")
     nodes = models.ManyToManyField(Node, blank=True, verbose_name="节点")
 

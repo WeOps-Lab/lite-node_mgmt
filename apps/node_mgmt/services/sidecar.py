@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.utils.http import quote_etag
 
 from apps.node_mgmt.constants import L_INSTALL_DOWNLOAD_URL, L_SIDECAR_DOWNLOAD_URL, W_SIDECAR_DOWNLOAD_URL
-from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, SidecarEnv
+from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration
 
 logger = logging.getLogger("app")
 
@@ -155,21 +155,6 @@ class Sidecar:
 
         # 返回配置信息和新的 ETag
         return JsonResponse(configuration, headers={'ETag': new_etag})
-
-    @staticmethod
-    def get_variables(node_obj):
-        """获取变量"""
-        objs = SidecarEnv.objects.all()
-        variables = {obj.key: obj.value for obj in objs}
-        node_dict = {
-            "node__id": node_obj.id,
-            "node__name": node_obj.name,
-            "node__ip": node_obj.ip,
-            "node__operating_system": node_obj.operating_system,
-            "node__collector_configuration_directory": node_obj.collector_configuration_directory,
-        }
-        variables.update(node_dict)
-        return variables
 
     @staticmethod
     def render_template(template_str, variables):

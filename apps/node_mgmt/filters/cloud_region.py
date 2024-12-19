@@ -1,6 +1,5 @@
 from django_filters import rest_framework as filters
 from apps.node_mgmt.models.cloud_region import CloudRegion
-from apps.node_mgmt.models.env_variable import EnvVariable
 
 
 class CloudRegionFilter(filters.FilterSet):

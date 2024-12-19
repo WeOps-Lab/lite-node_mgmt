@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.db.models import JSONField
 
@@ -59,11 +61,18 @@ class CollectorConfiguration(TimeInfo, MaintainerInfo):
     collector = models.ForeignKey(Collector, on_delete=models.CASCADE, verbose_name="采集器")
     nodes = models.ManyToManyField(Node, blank=True, verbose_name="节点")
     cloud_region = models.ForeignKey(CloudRegion, on_delete=models.CASCADE, verbose_name="云区域")
+    operating_system = models.CharField(max_length=50, choices=OS_TYPE, verbose_name="操作系统类型")
 
     class Meta:
-        verbose_name = "采集器配信息"
+        verbose_name = "采集器配置信息"
         db_table = "collector_configuration"
-        verbose_name_plural = "采集器配信息"
+        verbose_name_plural = "采集器配置信息"
+
+    # uuid
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.id = str(uuid.uuid4())
+        super().save(*args, **kwargs)
 
 
 class Action(TimeInfo, MaintainerInfo):

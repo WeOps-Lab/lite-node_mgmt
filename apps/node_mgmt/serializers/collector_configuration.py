@@ -5,15 +5,10 @@ from apps.node_mgmt.models.sidecar import CollectorConfiguration, Node, Collecto
 
 
 class CollectorConfigurationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CollectorConfiguration
-        fields = '__all__'
-
-
-class CollectorConfigurationListSerializer(serializers.ModelSerializer):
     collector = serializers.PrimaryKeyRelatedField(queryset=Collector.objects.all())
     nodes = serializers.PrimaryKeyRelatedField(queryset=Node.objects.all(), many=True)
     node_count = serializers.SerializerMethodField()
+    operating_system = serializers.CharField(source='collector.node_operating_system')
 
     class Meta:
         model = CollectorConfiguration
@@ -29,7 +24,7 @@ class CollectorConfigurationCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CollectorConfiguration
-        fields = ['name', 'config_template', 'operating_system', 'collector_id', 'cloud_region_id']
+        fields = ['name', 'config_template', 'collector_id', 'cloud_region_id']
 
 
 class CollectorConfigurationUpdateSerializer(serializers.ModelSerializer):
@@ -37,4 +32,16 @@ class CollectorConfigurationUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CollectorConfiguration
-        fields = ['name', 'config_template', 'operating_system', 'collector_id']
+        fields = ['name', 'config_template', 'collector_id']
+
+
+class BulkDeleteConfigurationSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.CharField(),
+        required=True
+    )
+
+
+class ApplyToNodeSerializer(serializers.Serializer):
+    node_id = serializers.CharField(required=True)
+    collector_configuration_id = serializers.CharField(required=True)

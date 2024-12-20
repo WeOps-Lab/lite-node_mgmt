@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.utils.http import quote_etag
 
 from apps.node_mgmt.constants import L_INSTALL_DOWNLOAD_URL, L_SIDECAR_DOWNLOAD_URL, W_SIDECAR_DOWNLOAD_URL
-from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration
+from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, SidecarEnv
 
 logger = logging.getLogger("app")
 
@@ -157,6 +157,21 @@ class Sidecar:
         return JsonResponse(configuration, headers={'ETag': new_etag})
 
     @staticmethod
+    def get_variables(node_obj):
+        """获取变量"""
+        objs = SidecarEnv.objects.filter(cloud_region=node_obj.cloud_region_id)
+        variables = {obj.key: obj.value for obj in objs}
+        node_dict = {
+            "node__id": node_obj.id,
+            "node__name": node_obj.name,
+            "node__ip": node_obj.ip,
+            "node__operating_system": node_obj.operating_system,
+            "node__collector_configuration_directory": node_obj.collector_configuration_directory,
+        }
+        variables.update(node_dict)
+        return variables
+
+    @staticmethod
     def render_template(template_str, variables):
         """
         渲染字符串模板，将 ${变量} 替换为给定的值。
@@ -168,6 +183,17 @@ class Sidecar:
         template_str = template_str.replace('node.', 'node__')
         template = Template(template_str)
         return template.safe_substitute(variables)
+
+    @staticmethod
+    def get_sidecar_install_steps(ip, operating_system):
+        """生成 sidecar 安装命令"""
+        if operating_system.lower() == 'windows':
+            return r'.\install_sidecar.bat "{}" "{}" "{}"'.format(ip, "your_token", "your_host")
+        elif operating_system.lower() == 'linux':
+            params = ["L_INSTALL_DOWNLOAD_URL", ip, "your_token", "your_host", "L_SIDECAR_DOWNLOAD_URL"]
+            return 'curl -sSL {}|bash -s - -n "{}" -t "{}" -s "{}" -d "{}"'.format(*params)
+        else:
+            return "Unsupported operating system"
 
     # def get_installation_steps(self):
     #     """获取安装步骤"""

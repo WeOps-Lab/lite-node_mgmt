@@ -1,20 +1,13 @@
 from django.contrib import admin
 
-from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, Action, SidecarApiToken
+from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, Action, SidecarApiToken, SidecarEnv
 from apps.node_mgmt.models.cloud_region import CloudRegion
-from apps.node_mgmt.models.env_variable import EnvVariable
 
 
 @admin.register(CloudRegion)
 class CloudRegionAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'introduction')
     search_fields = ('name', 'introduction')
-
-
-@admin.register(EnvVariable)
-class EnvVariableAdmin(admin.ModelAdmin):
-    list_display = ('key', 'value', 'description')
-    search_fields = ('key', 'value', 'description')
 
 
 @admin.register(Node)
@@ -47,3 +40,7 @@ class SidecarApiTokenAdmin(admin.ModelAdmin):
     search_fields = ('token',)
 
 
+@admin.register(SidecarEnv)
+class SidecarEnvAdmin(admin.ModelAdmin):
+    list_display = ('key', 'value')
+    search_fields = ('key', 'value')

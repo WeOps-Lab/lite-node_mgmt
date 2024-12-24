@@ -23,7 +23,7 @@ class Node(TimeInfo, MaintainerInfo):
     status = JSONField(default=dict, verbose_name="状态")
     tags = JSONField(default=list, verbose_name="标签")
     log_file_list = JSONField(default=list, verbose_name="日志文件列表")
-    cloud_region = models.ForeignKey(CloudRegion, on_delete=models.CASCADE, verbose_name="云区域")
+    cloud_region = models.ForeignKey(CloudRegion, default=1, on_delete=models.CASCADE, verbose_name="云区域")
 
     class Meta:
         verbose_name = "节点信息"
@@ -59,7 +59,7 @@ class CollectorConfiguration(TimeInfo, MaintainerInfo):
     config_template = models.TextField(blank=True, verbose_name="配置模板")
     collector = models.ForeignKey(Collector, on_delete=models.CASCADE, verbose_name="采集器")
     nodes = models.ManyToManyField(Node, blank=True, verbose_name="节点")
-    cloud_region = models.ForeignKey(CloudRegion, on_delete=models.CASCADE, verbose_name="云区域")
+    cloud_region = models.ForeignKey(CloudRegion, default=1, on_delete=models.CASCADE, verbose_name="云区域")
 
     class Meta:
         verbose_name = "采集器配置信息"
@@ -96,7 +96,7 @@ class SidecarEnv(models.Model):
     key = models.CharField(max_length=100)
     value = models.CharField(max_length=200)
     description = models.TextField(blank=True, verbose_name="描述")
-    cloud_region = models.ForeignKey(CloudRegion, on_delete=models.CASCADE, verbose_name="云区域")
+    cloud_region = models.ForeignKey(CloudRegion, default=1, on_delete=models.CASCADE, verbose_name="云区域")
 
     class Meta:
         verbose_name = "Sidecar环境变量"

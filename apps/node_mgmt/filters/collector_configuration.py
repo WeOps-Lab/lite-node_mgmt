@@ -3,8 +3,8 @@ from apps.node_mgmt.models.sidecar import CollectorConfiguration
 
 
 class CollectorConfigurationFilter(filters.FilterSet):
-    name = filters.CharFilter(lookup_expr='icontains')
-    cloud_region_id = filters.NumberFilter(field_name='cloud_region_id', lookup_expr='exact')
+    name = filters.CharFilter(field_name='name', lookup_expr='icontains', label='配置名称')
+    cloud_region_id = filters.NumberFilter(field_name='cloud_region_id', lookup_expr='exact', label='云区域ID')
 
     class Meta:
         model = CollectorConfiguration

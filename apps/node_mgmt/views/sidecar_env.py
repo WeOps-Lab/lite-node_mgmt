@@ -26,6 +26,8 @@ class SidecarEnvViewSet(mixins.CreateModelMixin,
         manual_parameters=[
             openapi.Parameter('search', openapi.IN_QUERY, description="模糊搜索(key, description)",
                               type=openapi.TYPE_STRING),
+            openapi.Parameter('cloud_region_id', openapi.IN_QUERY, description="云区域ID", type=openapi.TYPE_INTEGER,
+                              required=True),
         ],
         tags=['SidecarEnv Variable']
     )

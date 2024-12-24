@@ -185,15 +185,15 @@ class Sidecar:
         return template.safe_substitute(variables)
 
     @staticmethod
-    def get_sidecar_install_steps(ip, operating_system):
-        """生成 sidecar 安装命令"""
+    def get_sidecar_install_guide(ip, operating_system):
+        """生成 sidecar 安装指南"""
         if operating_system.lower() == 'windows':
             return r'.\install_sidecar.bat "{}" "{}" "{}"'.format(ip, "your_token", "your_host")
         elif operating_system.lower() == 'linux':
             params = ["L_INSTALL_DOWNLOAD_URL", ip, "your_token", "your_host", "L_SIDECAR_DOWNLOAD_URL"]
             return 'curl -sSL {}|bash -s - -n "{}" -t "{}" -s "{}" -d "{}"'.format(*params)
         else:
-            return "Unsupported operating system"
+            return ""
 
     # def get_installation_steps(self):
     #     """获取安装步骤"""

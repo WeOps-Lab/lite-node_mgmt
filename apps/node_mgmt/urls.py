@@ -7,14 +7,15 @@ from apps.node_mgmt.views.sidecar_env import SidecarEnvViewSet
 from apps.node_mgmt.views.node import NodeViewSet
 from apps.node_mgmt.views.sidecar import SidecarViewSet, OpenSidecarViewSet
 
-router = routers.DefaultRouter(trailing_slash=False)
+router = routers.DefaultRouter(trailing_slash=True)
 router.register(r"api/node", NodeViewSet, basename="node")
 router.register(r"api/sidecar", SidecarViewSet, basename="sidecar")
 router.register(r'api/cloud_region', CloudRegionViewSet, basename='cloud_region')
 router.register(r'api/sidecar_env', SidecarEnvViewSet, basename='env_variable')
 router.register(r"api/collector", CollectorViewSet, basename="collector")
-router.register(r"api/collector_configuration", CollectorConfigurationViewSet, basename="sidecar")
+router.register(r"api/configuration", CollectorConfigurationViewSet, basename="configuration")
 
-router.register(r"open_api", OpenSidecarViewSet, basename="open_node")
+router_without_slash = routers.DefaultRouter(trailing_slash=False)
+router_without_slash.register(r"open_api", OpenSidecarViewSet, basename="open_node")
 
-urlpatterns = router.urls
+urlpatterns = router.urls + router_without_slash.urls

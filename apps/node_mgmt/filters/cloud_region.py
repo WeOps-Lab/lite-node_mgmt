@@ -3,8 +3,8 @@ from apps.node_mgmt.models.cloud_region import CloudRegion
 
 
 class CloudRegionFilter(filters.FilterSet):
-    name = filters.CharFilter(field_name='name', lookup_expr='icontains')
-    introduction = filters.CharFilter(field_name='introduction', lookup_expr='icontains')
+    name = filters.CharFilter(field_name='name', lookup_expr='icontains', label='云区域名称')
+    introduction = filters.CharFilter(field_name='introduction', lookup_expr='icontains', label='云区域介绍')
 
     class Meta:
         model = CloudRegion

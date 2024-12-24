@@ -5,7 +5,7 @@ from apps.node_mgmt.models.cloud_region import CloudRegion
 class CloudRegionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CloudRegion
-        fields = ['id', 'name', 'introduction', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'introduction']
 
 
 class CloudRegionUpdateSerializer(serializers.ModelSerializer):

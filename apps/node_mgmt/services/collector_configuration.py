@@ -20,6 +20,33 @@ class CollectorConfigurationService:
             # 添加新的配置文件
             collector_configuration.nodes.add(node)
             collector_configuration.save()
-            return {"success": True, "message": "采集器配置已成功应用到节点。"}
-        except Exception as e:
-            return {"success": False, "message": str(e)}
+        except Node.DoesNotExist:
+            return False, "节点不存在"
+        except CollectorConfiguration.DoesNotExist:
+            return False, "采集器配置不存在"
+        return True, ""
+
+    @staticmethod
+    def calculate_node_count(configurations):
+        """补充字段：已经应用了该配置文件的节点数量"""
+        node_ids = {node_id for config in configurations for node_id in config['nodes']}
+        nodes = Node.objects.filter(id__in=node_ids).values('id', 'status')
+
+        node_status_map = {node['id']: node['status'] for node in nodes}
+
+        for config in configurations:
+            apply_node_count = 0
+            applied_nodes = []
+            for node_id in config['nodes']:
+                node_status = node_status_map.get(node_id, {})
+                if 'collectors' in node_status:
+                    for collector in node_status['collectors']:
+                        if config['id'] in collector.get('configuration_id', []):
+                            apply_node_count += 1
+                            applied_nodes.append(node_id)
+            config['node_count'] = apply_node_count
+            # 计算未应用的节点
+            config['not_applied_nodes'] = list(set(config['nodes']) - set(applied_nodes))
+            # 仅保留已经应用的节点
+            config['nodes'] = applied_nodes
+        return configurations

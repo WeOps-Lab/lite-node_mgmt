@@ -7,15 +7,11 @@ from apps.node_mgmt.models.sidecar import CollectorConfiguration, Node, Collecto
 class CollectorConfigurationSerializer(serializers.ModelSerializer):
     collector = serializers.PrimaryKeyRelatedField(queryset=Collector.objects.all())
     nodes = serializers.PrimaryKeyRelatedField(queryset=Node.objects.all(), many=True)
-    node_count = serializers.SerializerMethodField()
     operating_system = serializers.CharField(source='collector.node_operating_system')
 
     class Meta:
         model = CollectorConfiguration
-        fields = ['id', 'name', 'config_template', 'operating_system', 'collector', 'nodes', 'node_count']
-
-    def get_node_count(self, obj):
-        return obj.nodes.count()
+        fields = ['id', 'name', 'config_template', 'operating_system', 'collector', 'nodes']
 
 
 class CollectorConfigurationCreateSerializer(serializers.ModelSerializer):

@@ -22,19 +22,32 @@ class NodeViewSet(mixins.DestroyModelMixin,
     filterset_class = NodeFilter
     pagination_class = CustomPageNumberPagination
     serializer_class = NodeSerializer
+    search_fields = ["id", "name", "ip"]
 
     @swagger_auto_schema(
         operation_id="node_list",
         operation_summary="获取节点列表",
         manual_parameters=[
-            openapi.Parameter('search', openapi.IN_QUERY, description="模糊搜索(id, name, ip)", type=openapi.TYPE_STRING),
+            openapi.Parameter('search', openapi.IN_QUERY, description="模糊搜索(id, name, ip)",
+                              type=openapi.TYPE_STRING),
+            openapi.Parameter('cloud_region_id', openapi.IN_QUERY, description="云区域ID", type=openapi.TYPE_INTEGER,
+                              required=True),
         ],
         tags=['Node']
     )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        node_list = NodeService.node_list(queryset)
-        return WebUtils.response_success(node_list)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = NodeSerializer(page, many=True)
+            node_data = serializer.data
+            processed_data = NodeService.process_node_data(node_data)
+            return self.get_paginated_response(processed_data)
+
+        serializer = NodeSerializer(queryset, many=True)
+        node_data = serializer.data
+        processed_data = NodeService.process_node_data(node_data)
+        return WebUtils.response_success(processed_data)
 
     @swagger_auto_schema(
         operation_id="node_del",
@@ -67,8 +80,11 @@ class NodeViewSet(mixins.DestroyModelMixin,
         serializer.is_valid(raise_exception=True)
         node_ids = serializer.validated_data["node_ids"]
         collector_configuration_id = serializer.validated_data["collector_configuration_id"]
-        result = NodeService.batch_binding_node_configuration(node_ids, collector_configuration_id)
-        return WebUtils.response_success(result)
+        result, message = NodeService.batch_binding_node_configuration(node_ids, collector_configuration_id)
+        if result:
+            return WebUtils.response_success(message)
+        else:
+            return WebUtils.response_error(error_message=message)
 
     @swagger_auto_schema(
         operation_id="batch_operate_node_collector",
@@ -83,5 +99,5 @@ class NodeViewSet(mixins.DestroyModelMixin,
         node_ids = serializer.validated_data["node_ids"]
         collector_id = serializer.validated_data["collector_id"]
         operation = serializer.validated_data["operation"]
-        result = NodeService.batch_operate_node_collector(node_ids, collector_id, operation)
-        return WebUtils.response_success(result)
+        NodeService.batch_operate_node_collector(node_ids, collector_id, operation)
+        return WebUtils.response_success()

@@ -20,21 +20,28 @@ class CollectorConfigurationViewSet(mixins.CreateModelMixin,
                                     mixins.DestroyModelMixin,
                                     mixins.ListModelMixin,
                                     GenericViewSet):
-    queryset = CollectorConfiguration.objects.all()
+    queryset = CollectorConfiguration.objects.all().order_by("-created_at")
     serializer_class = CollectorConfigurationSerializer
     filterset_class = CollectorConfigurationFilter
-    search_fields = ['id', 'name', 'operating_system']
+    search_fields = ['id', 'name']
 
     @swagger_auto_schema(
         operation_summary="获取采集器配置列表",
         manual_parameters=[
-            openapi.Parameter('search', openapi.IN_QUERY, description="模糊搜索(id, name, operating_system)",
+            openapi.Parameter('search', openapi.IN_QUERY, description="模糊搜索(id, name)",
                               type=openapi.TYPE_STRING),
+            openapi.Parameter('cloud_region_id', openapi.IN_QUERY, description="云区域ID", type=openapi.TYPE_INTEGER,
+                              required=True),
         ],
         tags=['CollectorConfiguration']
     )
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        response = super().list(request, *args, **kwargs)
+        if isinstance(response.data, dict) and 'items' in response.data:
+            response.data['items'] = CollectorConfigurationService.calculate_node_count(response.data['items'])
+        else:
+            response.data = CollectorConfigurationService.calculate_node_count(response.data)
+        return response
 
     @swagger_auto_schema(
         operation_summary="创建采集器配置",
@@ -72,7 +79,7 @@ class CollectorConfigurationViewSet(mixins.CreateModelMixin,
         serializer.is_valid(raise_exception=True)
         ids = serializer.validated_data['ids']
         CollectorConfiguration.objects.filter(id__in=ids).delete()
-        return WebUtils.response_success({"success": True, "message": "批量删除成功。"})
+        return WebUtils.response_success()
 
     @swagger_auto_schema(
         operation_summary="应用指定采集器配置到指定节点",
@@ -85,5 +92,8 @@ class CollectorConfigurationViewSet(mixins.CreateModelMixin,
         serializer.is_valid(raise_exception=True)
         node_id = serializer.validated_data['node_id']
         collector_configuration_id = serializer.validated_data['collector_configuration_id']
-        result = CollectorConfigurationService.apply_to_node(node_id, collector_configuration_id)
-        return WebUtils.response_success(result)
+        result, message = CollectorConfigurationService.apply_to_node(node_id, collector_configuration_id)
+        if result:
+            return WebUtils.response_success()
+        else:
+            return WebUtils.response_error(error_message=message)

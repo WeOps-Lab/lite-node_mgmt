@@ -23,8 +23,8 @@ class SidecarViewSet(ViewSet):
     #     return WebUtils.response_success(result)
 
     @swagger_auto_schema(
-        operation_id="sidecar_install_steps",
-        operation_summary="获取sidecar的安装步骤",
+        operation_id="sidecar_install_guide",
+        operation_summary="获取sidecar的安装指南",
         manual_parameters=[
             openapi.Parameter("ip", openapi.IN_QUERY, description="节点ip", type=openapi.TYPE_STRING, required=True),
             openapi.Parameter("operating_system", openapi.IN_QUERY, description="操作系统", type=openapi.TYPE_STRING,
@@ -32,12 +32,14 @@ class SidecarViewSet(ViewSet):
         ],
         tags=['Sidecar']
     )
-    @action(detail=False, methods=["get"], url_path="install_steps")
-    def sidecar_install_steps(self, request):
+    @action(detail=False, methods=["get"], url_path="install_guide")
+    def sidecar_install_guide(self, request):
         ip = request.query_params.get('ip')
         operating_system = request.query_params.get('operating_system')
-        steps = Sidecar.get_sidecar_install_steps(ip, operating_system)
-        return WebUtils.response_success(steps)
+        if operating_system.lower() not in ['windows', 'linux']:
+            return WebUtils.response_error(error_message="operating_system参数错误, 只能为windows或linux")
+        guide = Sidecar.get_sidecar_install_guide(ip, operating_system)
+        return WebUtils.response_success(guide)
 
 
 class OpenSidecarViewSet(OpenAPIViewSet):

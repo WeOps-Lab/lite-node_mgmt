@@ -22,45 +22,24 @@ class SidecarViewSet(ViewSet):
     #     result = Sidecar().get_installation_steps()
     #     return WebUtils.response_success(result)
 
-    @action(detail=False, methods=["get"], url_path="node_list")
-    def node_list(self, request, *args, **kwargs):
-        return WebUtils.response_success()
-
-    @action(detail=False, methods=["put"], url_path="set_node_configuration")
-    def set_node_configuration(self, request, *args, **kwargs):
-        return WebUtils.response_success()
-
-    @action(detail=False, methods=["get"], url_path="collector_list")
-    def collector_list(self, request, *args, **kwargs):
-        return WebUtils.response_success()
-
-    @action(detail=False, methods=["post"], url_path="create_collector")
-    def create_collector(self, request, *args, **kwargs):
-        return WebUtils.response_success()
-
-    @action(detail=False, methods=["put"], url_path="update_collector")
-    def update_collector(self, request, *args, **kwargs):
-        return WebUtils.response_success()
-
-    @action(detail=False, methods=["delete"], url_path="delete_collector")
-    def delete_collector(self, request, *args, **kwargs):
-        return WebUtils.response_success()
-
-    @action(detail=False, methods=["get"], url_path="configuration_list")
-    def configuration_list(self, request, *args, **kwargs):
-        return WebUtils.response_success()
-
-    @action(detail=False, methods=["post"], url_path="create_configuration")
-    def create_configuration(self, request, *args, **kwargs):
-        return WebUtils.response_success()
-
-    @action(detail=False, methods=["put"], url_path="update_configuration")
-    def update_configuration(self, request, *args, **kwargs):
-        return WebUtils.response_success()
-
-    @action(detail=False, methods=["delete"], url_path="delete_configuration")
-    def delete_configuration(self, request, *args, **kwargs):
-        return WebUtils.response_success()
+    @swagger_auto_schema(
+        operation_id="sidecar_install_guide",
+        operation_summary="获取sidecar的安装指南",
+        manual_parameters=[
+            openapi.Parameter("ip", openapi.IN_QUERY, description="节点ip", type=openapi.TYPE_STRING, required=True),
+            openapi.Parameter("operating_system", openapi.IN_QUERY, description="操作系统", type=openapi.TYPE_STRING,
+                              required=True, enum=["linux", "windows"]),
+        ],
+        tags=['Sidecar']
+    )
+    @action(detail=False, methods=["get"], url_path="install_guide")
+    def sidecar_install_guide(self, request):
+        ip = request.query_params.get('ip')
+        operating_system = request.query_params.get('operating_system')
+        if operating_system.lower() not in ['windows', 'linux']:
+            return WebUtils.response_error(error_message="operating_system参数错误, 只能为windows或linux")
+        guide = Sidecar.get_sidecar_install_guide(ip, operating_system)
+        return WebUtils.response_success(guide)
 
 
 class OpenSidecarViewSet(OpenAPIViewSet):
@@ -103,7 +82,8 @@ class OpenSidecarViewSet(OpenAPIViewSet):
             openapi.Parameter("configuration_id", openapi.IN_PATH, description="配置ID", type=openapi.TYPE_STRING),
         ],
     )
-    @action(detail=False, methods=["get"], url_path="node/sidecar/configurations/render/(?P<node_id>.+?)/(?P<configuration_id>.+?)")
+    @action(detail=False, methods=["get"],
+            url_path="node/sidecar/configurations/render/(?P<node_id>.+?)/(?P<configuration_id>.+?)")
     @token_auth
     def configuration(self, request, node_id, configuration_id):
         return Sidecar.get_node_config(request, node_id, configuration_id)

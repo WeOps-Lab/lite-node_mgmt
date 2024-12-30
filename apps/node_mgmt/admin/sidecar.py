@@ -1,6 +1,13 @@
 from django.contrib import admin
 
 from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, Action, SidecarApiToken, SidecarEnv
+from apps.node_mgmt.models.cloud_region import CloudRegion
+
+
+@admin.register(CloudRegion)
+class CloudRegionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'introduction')
+    search_fields = ('name', 'introduction')
 
 
 @admin.register(Node)

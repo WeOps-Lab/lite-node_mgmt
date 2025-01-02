@@ -29,6 +29,7 @@ class SidecarViewSet(ViewSet):
             openapi.Parameter("ip", openapi.IN_QUERY, description="节点ip", type=openapi.TYPE_STRING, required=True),
             openapi.Parameter("operating_system", openapi.IN_QUERY, description="操作系统", type=openapi.TYPE_STRING,
                               required=True, enum=["linux", "windows"]),
+            openapi.Parameter("group", openapi.IN_QUERY, description="组织", type=openapi.TYPE_STRING, required=True),
         ],
         tags=['Sidecar']
     )
@@ -36,9 +37,10 @@ class SidecarViewSet(ViewSet):
     def sidecar_install_guide(self, request):
         ip = request.query_params.get('ip')
         operating_system = request.query_params.get('operating_system')
+        group = request.query_params.get('group')
         if operating_system.lower() not in ['windows', 'linux']:
             return WebUtils.response_error(error_message="operating_system参数错误, 只能为windows或linux")
-        guide = Sidecar.get_sidecar_install_guide(ip, operating_system)
+        guide = Sidecar.get_sidecar_install_guide(ip, operating_system, group)
         return WebUtils.response_success(guide)
 
 

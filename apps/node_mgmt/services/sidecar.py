@@ -6,7 +6,7 @@ from django.core.cache import cache
 from django.http import JsonResponse
 from django.utils.http import quote_etag
 
-from apps.node_mgmt.constants import L_INSTALL_DOWNLOAD_URL, L_SIDECAR_DOWNLOAD_URL, W_SIDECAR_DOWNLOAD_URL
+from apps.node_mgmt.constants import L_INSTALL_DOWNLOAD_URL, L_SIDECAR_DOWNLOAD_URL, W_SIDECAR_DOWNLOAD_URL, LOCAL_HOST
 from apps.node_mgmt.models.sidecar import Node, Collector, CollectorConfiguration, SidecarEnv
 
 logger = logging.getLogger("app")
@@ -185,13 +185,15 @@ class Sidecar:
         return template.safe_substitute(variables)
 
     @staticmethod
-    def get_sidecar_install_guide(ip, operating_system):
+    def get_sidecar_install_guide(ip, operating_system, group):
         """生成 sidecar 安装指南"""
+        local_host = LOCAL_HOST
+        local_api_token = ""
         if operating_system.lower() == 'windows':
-            return r'.\install_sidecar.bat "{}" "{}" "{}"'.format(ip, "your_token", "your_host")
+            return r'.\install_sidecar.bat  "{}" "{}" "{}" "{}"'.format(ip, local_api_token, local_host, group)
         elif operating_system.lower() == 'linux':
-            params = ["L_INSTALL_DOWNLOAD_URL", ip, "your_token", "your_host", "L_SIDECAR_DOWNLOAD_URL"]
-            return 'curl -sSL {}|bash -s - -n "{}" -t "{}" -s "{}" -d "{}"'.format(*params)
+            params = [L_INSTALL_DOWNLOAD_URL, ip, local_api_token, local_host, L_SIDECAR_DOWNLOAD_URL, group]
+            return 'curl -sSL {}|bash -s - -n "{}" -t "{}" -s "{}" -d "{}" -g "{}"'.format(*params)
         else:
             return ""
 

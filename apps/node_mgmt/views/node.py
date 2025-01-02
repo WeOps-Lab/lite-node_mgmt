@@ -32,11 +32,19 @@ class NodeViewSet(mixins.DestroyModelMixin,
                               type=openapi.TYPE_STRING),
             openapi.Parameter('cloud_region_id', openapi.IN_QUERY, description="云区域ID", type=openapi.TYPE_INTEGER,
                               required=True),
+            openapi.Parameter('organization_ids', openapi.IN_QUERY, description="组织ID列表(用逗号分隔)", type=openapi.TYPE_STRING),
         ],
         tags=['Node']
     )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+
+        # 根据组织筛选
+        organization_ids = request.query_params.get('organization_ids')
+        if organization_ids:
+            organization_ids = organization_ids.split(',')
+            queryset = queryset.filter(nodeorganization__organization__in=organization_ids).distinct()
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = NodeSerializer(page, many=True)

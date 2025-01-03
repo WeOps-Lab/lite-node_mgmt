@@ -31,6 +31,17 @@ class Node(TimeInfo, MaintainerInfo):
         verbose_name_plural = "节点信息"
 
 
+class NodeOrganization(TimeInfo, MaintainerInfo):
+    node = models.ForeignKey(Node, on_delete=models.CASCADE, verbose_name="节点")
+    organization = models.CharField(max_length=100, verbose_name="组织id")
+
+    class Meta:
+        verbose_name = "节点组织"
+        db_table = "node_organization"
+        verbose_name_plural = "节点组织"
+        unique_together = ('node', 'organization')
+
+
 class Collector(TimeInfo, MaintainerInfo):
     ServiceType = (
         ("exec", "执行任务"),
